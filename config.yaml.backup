@@ -1,0 +1,49 @@
+# Facial Recognition System Configuration
+
+# Application Settings
+app:
+  name: "Facial Recognition System"
+  version: "1.0.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 8000
+
+# Database Configuration
+database:
+  url: "sqlite:///data/database/facial_recognition.db"
+  echo: false
+
+# Face Recognition Settings (MediaPipe - M4 Mac Optimized)
+face_recognition:
+  model: "mediapipe"  # Using MediaPipe for Apple Silicon compatibility
+  tolerance: 0.85  # Similarity threshold for MediaPipe (higher is more strict, 0.0 - 1.0)
+  num_jitters: 1  # Not used in MediaPipe (kept for compatibility)
+  detection_method: "mediapipe"  # MediaPipe face detection
+
+# Video Processing Settings
+video:
+  frame_skip: 5  # Process every Nth frame to improve performance
+  max_upload_size_mb: 500
+  supported_formats: [".mp4", ".avi", ".mov", ".mkv"]
+  output_format: "mp4"
+  resize_width: 640  # Resize frames for faster processing
+
+# Detection Settings
+detection:
+  save_detections: true
+  save_frames: true
+  confidence_threshold: 0.5
+  min_face_size: 20  # Minimum face size in pixels
+
+# Storage Paths
+paths:
+  uploads: "data/uploads"
+  known_faces: "data/known_faces"
+  detections: "data/detections"
+  database: "data/database"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "data/logs/app.log"

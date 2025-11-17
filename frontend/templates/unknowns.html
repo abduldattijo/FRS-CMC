@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unknown Persons - Facial Recognition System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Facial Recognition System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Dashboard</a></li>
+                    <li><a href="/register">Register Person</a></li>
+                    <li><a href="/monitor">Monitor Detections</a></li>
+                    <li><a href="/unknowns" class="active">Unknown Persons</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Unknown Persons Gallery</h2>
+            <p>These are people detected in your videos who haven't been identified yet. You can review their images and promote them to registered persons when identified.</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="stat-value" id="total-unknowns">0</div>
+                <div class="stat-label">Total Unknown Persons</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-unknown-detections">0</div>
+                <div class="stat-label">Total Detections</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+            <h3>Filter Options</h3>
+            <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="form-group">
+                    <label for="min-detections">Minimum Detections</label>
+                    <input type="number" id="min-detections" value="1" min="1">
+                </div>
+                <button class="btn btn-primary" onclick="loadUnknownPersons()">Apply Filter</button>
+            </div>
+        </div>
+
+        <!-- Unknown Persons Grid -->
+        <div class="card">
+            <h3>Unknown Persons</h3>
+            <div id="unknowns-grid" class="detection-grid">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        const API_BASE = '/api/v1';
+
+        // Load unknown persons on page load
+        loadUnknownPersons();
+
+        async function loadUnknownPersons() {
+            try {
+                const minDetections = document.getElementById('min-detections').value;
+                const response = await fetch(`${API_BASE}/enhanced-video/unknown-persons?min_detections=${minDetections}`);
+                const data = await response.json();
+
+                const gridContainer = document.getElementById('unknowns-grid');
+                document.getElementById('total-unknowns').textContent = data.total || 0;
+
+                if (data.unknown_persons.length === 0) {
+                    gridContainer.innerHTML = '<p>No unknown persons found. Upload and process videos to see detected faces.</p>';
+                    document.getElementById('total-unknown-detections').textContent = '0';
+                    return;
+                }
+
+                // Calculate total detections
+                const totalDetections = data.unknown_persons.reduce((sum, u) => sum + u.total_detections, 0);
+                document.getElementById('total-unknown-detections').textContent = totalDetections;
+
+                // Create grid
+                let gridHTML = '';
+
+                data.unknown_persons.forEach(unknown => {
+                    // Extract image URL if available and properly encode
+                    let imageUrl = null;
+                    let showPlaceholder = true;
+
+                    if (unknown.representative_image_path) {
+                        const pathParts = unknown.representative_image_path.split('/');
+                        const filename = pathParts[pathParts.length - 1];
+                        const folderName = pathParts[pathParts.length - 2];
+
+                        // URL encode each part
+                        const encodedFolder = encodeURIComponent(folderName);
+                        const encodedFile = encodeURIComponent(filename);
+                        imageUrl = `/detections/${encodedFolder}/${encodedFile}`;
+                        showPlaceholder = false;
+                    }
+
+                    const firstSeen = new Date(unknown.first_seen).toLocaleString();
+                    const lastSeen = new Date(unknown.last_seen).toLocaleString();
+
+                    gridHTML += `
+                        <div class="detection-item" onclick="viewUnknownTimeline(${unknown.id})" style="cursor:pointer;">
+                            ${imageUrl ? `
+                                <img src="${imageUrl}"
+                                     alt="${unknown.identifier}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                     onload="this.style.opacity='1';"
+                                     style="opacity:0; transition: opacity 0.3s;">
+                            ` : ''}
+                            <div style="display:${showPlaceholder ? 'flex' : 'none'}; height:220px; align-items:center; justify-content:center; background:#f3f4f6; color:#9ca3af; font-size:14px;">
+                                No Image Available
+                            </div>
+                            <div class="detection-info">
+                                <div class="detection-name">${unknown.identifier}</div>
+                                <div class="detection-confidence">Detections: ${unknown.total_detections}</div>
+                                <div class="detection-time">First: ${firstSeen}</div>
+                                <div class="detection-time">Last: ${lastSeen}</div>
+                                <span class="badge badge-warning">Unknown</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                gridContainer.innerHTML = gridHTML;
+
+            } catch (error) {
+                console.error('Error loading unknown persons:', error);
+                document.getElementById('unknowns-grid').innerHTML = '<p>Error loading unknown persons.</p>';
+            }
+        }
+
+        async function viewUnknownTimeline(unknownId) {
+            try {
+                const response = await fetch(`${API_BASE}/enhanced-video/unknown-persons/${unknownId}/timeline`);
+                const data = await response.json();
+
+                alert(`${data.identifier}\n\nTotal Detections: ${data.total_detections}\nVideos: ${data.videos_appeared_in}\n\nClick OK to see detailed timeline in console.`);
+                console.log('Unknown Person Timeline:', data);
+            } catch (error) {
+                console.error('Error loading timeline:', error);
+                alert('Error loading timeline for this person.');
+            }
+        }
+    </script>
+</body>
+</html>

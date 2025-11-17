@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Person - Facial Recognition System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Facial Recognition System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Dashboard</a></li>
+                    <li><a href="/register" class="active">Register Person</a></li>
+                    <li><a href="/monitor">Monitor Detections</a></li>
+                    <li><a href="/unknowns">Unknown Persons</a></li>
+                </ul>
+                </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Register New Person</h2>
+            <div id="alert-container"></div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="employee-id">Employee ID</label>
+                    <input type="text" id="employee-id">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone">
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <input type="text" id="department">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="face-image">Face Image *</label>
+                    <div class="upload-area" id="image-upload-area">
+                        <p>Click to select or drag and drop an image</p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Please provide a clear photo with only one face</p>
+                    </div>
+                    <input type="file" id="face-image" accept="image/*" required style="display: none;">
+                    <div id="image-preview" style="margin-top: 1rem; display: none;">
+                        <img id="preview-img" style="max-width: 300px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="register-btn">
+                    Register Person
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                    Clear Form
+                </button>
+            </form>
+        </div>
+
+        <!-- Registered Persons List -->
+        <div class="card">
+            <h2 class="card-title">Registered Persons</h2>
+            <div id="persons-table">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Setup image upload
+        setupImageUpload();
+
+        // Setup form submission
+        setupRegisterForm();
+
+        // Load persons list
+        loadPersonsList();
+    </script>
+</body>
+</html>

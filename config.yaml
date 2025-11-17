@@ -1,0 +1,134 @@
+# Improved Facial Recognition System Configuration
+# Optimized for West African faces with darker skin tones
+
+# Application Settings
+app:
+  name: "Improved Facial Recognition System"
+  version: "2.0.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 8000
+
+# Database Configuration
+database:
+  url: "sqlite:///data/database/facial_recognition_improved.db"
+  echo: false
+
+# Improved Face Recognition Settings - Optimized for West African Faces
+face_recognition:
+  # Model Configuration
+  model: "insightface_buffalo_l"  # InsightFace buffalo_l for 512D embeddings
+  embedding_dimension: 512         # 512D embeddings (vs 128D in old system)
+
+  # Detection Settings
+  detector: "retinaface"           # RetinaFace - better for darker skin tones
+  detection_confidence: 0.7        # Lowered from 0.9 to catch more faces (angles, lighting)
+
+  # Matching Thresholds (Optimized for West African faces)
+  similarity_threshold: 0.62       # 0.60-0.65 range recommended
+  clustering_threshold: 0.65       # For grouping same person across videos
+
+  # Quality Filtering
+  min_quality_score: 0.5           # Minimum overall quality (0.0-1.0)
+  min_blur_score: 0.3              # Minimum sharpness
+  min_size_score: 0.4              # Minimum face size
+  min_angle_score: 0.4             # Minimum pose quality
+
+  # Face Detection Parameters
+  detection_size: 640              # Detection image size (640x640)
+  min_face_size: 15                # Minimum face size in pixels (lowered from 30 to catch distant faces)
+
+# FAISS Configuration for Fast Similarity Search
+faiss:
+  enabled: true                    # Use FAISS for cross-video matching
+  use_gpu: false                   # Set to true if you have CUDA GPU
+  k_neighbors: 50                  # Number of nearest neighbors to search
+  save_index: true                 # Cache FAISS index to disk
+  index_path: "data/faiss_index"   # Path to save FAISS index
+
+# Video Processing Settings
+video:
+  frame_skip: 3                    # Process every Nth frame (lowered from 5 to catch more people)
+  max_upload_size_mb: 500
+  supported_formats: [".mp4", ".avi", ".mov", ".mkv"]
+  output_format: "mp4"
+  resize_width: 640                # Resize frames for processing
+
+  # Lighting Optimization for West African Faces
+  auto_enhance: true               # Automatically enhance dark/low-contrast images
+  histogram_equalization: true     # Apply histogram equalization for better contrast
+  gamma_correction: 1.2            # Gamma correction for darker images (1.0-1.5)
+
+# Detection Settings
+detection:
+  save_detections: true
+  save_frames: true
+  save_quality_scores: true        # NEW: Save quality metrics with each detection
+
+  # Confidence thresholds
+  min_detection_confidence: 0.4    # Lowered from 0.5 to detect more faces
+  confidence_threshold: 0.4        # General threshold for face detection
+
+# Storage Paths
+paths:
+  uploads: "data/uploads"
+  known_faces: "data/known_faces"
+  detections: "data/detections_improved"  # Separate folder for improved system
+  database: "data/database"
+  models: "data/models"            # NEW: Store downloaded models
+  faiss_index: "data/faiss_index"  # NEW: FAISS index cache
+
+# Cross-Video Tracking Settings
+cross_video:
+  # Matching strategy
+  use_faiss: true                  # Use FAISS for fast matching
+  batch_size: 100                  # Process faces in batches
+
+  # Deduplication within videos
+  intra_video_threshold: 0.92      # Threshold for same person in same video (MUCH STRICTER - was 0.70, then 0.78)
+  clustering_algorithm: "dbscan"   # "dbscan" or "agglomerative"
+  # Note: 0.92 means faces must be 92% similar to be grouped as same person
+  # Lower values group more aggressively (more false grouping)
+  # Higher values separate more (better for distinguishing different people)
+
+  # Quality filtering
+  use_best_faces_only: true        # Only use highest quality faces for matching
+  top_k_faces_per_person: 5        # Keep top K quality faces per person per video
+
+# Optimization for West African Faces
+west_african_optimization:
+  enabled: true
+
+  # Lighting adjustments
+  enhance_dark_regions: true       # Enhance darker areas of image
+  adaptive_histogram: true         # Use CLAHE for local contrast enhancement
+  shadow_compensation: 1.2         # Boost shadow regions (1.0-2.0)
+
+  # Detection tuning
+  lower_detection_threshold: 0.85  # Slightly lower threshold for diverse faces
+  multiple_scales: true            # Detect at multiple scales
+
+  # Embedding optimization
+  normalize_embeddings: true       # Always normalize embeddings
+  use_cosine_similarity: true      # Cosine similarity works best for normalized vectors
+
+# Logging
+logging:
+  level: "INFO"                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "data/logs/app_improved.log"
+  log_quality_scores: true         # NEW: Log quality scores for analysis
+
+# Performance Settings
+performance:
+  use_multiprocessing: true        # Process videos in parallel
+  num_workers: 4                   # Number of parallel workers
+  batch_processing: true           # Process frames in batches
+  cache_embeddings: true           # Cache embeddings in memory
+
+# Experimental Features
+experimental:
+  face_alignment: true             # Align faces before embedding
+  anti_spoofing: false             # Detect fake faces (printed photos, screens)
+  age_gender_estimation: false     # Estimate age and gender (optional)
+  expression_detection: false      # Detect facial expressions (optional)

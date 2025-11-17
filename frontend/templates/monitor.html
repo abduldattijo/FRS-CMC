@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Detections - Facial Recognition System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Facial Recognition System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Dashboard</a></li>
+                    <li><a href="/register">Register Person</a></li>
+                    <li><a href="/monitor" class="active">Monitor Detections</a></li>
+                    <li><a href="/unknowns">Unknown Persons</a></li>
+                </ul>
+                </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Filters -->
+        <div class="card">
+            <h2 class="card-title">Filter Detections</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label for="filter-person">Person</label>
+                    <select id="filter-person">
+                        <option value="">All Persons</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filter-video">Video</label>
+                    <select id="filter-video">
+                        <option value="">All Videos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filter-unknown">Show Unknown Only</label>
+                    <input type="checkbox" id="filter-unknown">
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detection Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Detections</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value" id="stat-known">0</div>
+                <div class="stat-label">Known Persons</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="stat-unknown">0</div>
+                <div class="stat-label">Unknown Persons</div>
+            </div>
+        </div>
+
+        <!-- Detections Table -->
+        <div class="card">
+            <h2 class="card-title">Recent Detections</h2>
+            <div id="detections-table">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Detection Images Grid -->
+        <div class="card">
+            <h2 class="card-title">Detection Images</h2>
+            <div id="detections-grid" class="detection-grid">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Load detection statistics
+        loadDetectionStats();
+
+        // Load detections
+        loadDetections();
+
+        // Load filter options
+        loadFilterOptions();
+    </script>
+</body>
+</html>

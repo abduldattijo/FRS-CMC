@@ -1,0 +1,74 @@
+.git2/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment Variables
+.env
+
+# Data Files
+data/uploads/*
+data/known_faces/*
+data/detections/*
+data/cross_video_uploads/*
+data/cross_video_detections/*
+data/database/*.db
+data/*.db
+data/logs/*
+
+# Keep directory structure
+!data/uploads/.gitkeep
+!data/known_faces/.gitkeep
+!data/detections/.gitkeep
+!data/cross_video_uploads/.gitkeep
+!data/cross_video_detections/.gitkeep
+!data/database/.gitkeep
+!data/logs/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Video Identity Linking System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #0f3460;
+            --highlight-color: #e94560;
+            --text-color: #eee;
+            --border-color: #533483;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            color: var(--highlight-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            color: var(--highlight-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255,255,255,0.02);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--highlight-color);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn {
+            background: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #d63850;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--accent-color);
+        }
+
+        .btn-secondary:hover {
+            background: #0a2640;
+        }
+
+        .video-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .video-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .video-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--highlight-color);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-completed {
+            background: #28a745;
+        }
+
+        .status-processing {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status-failed {
+            background: #dc3545;
+        }
+
+        .cluster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .cluster-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .cluster-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--highlight-color);
+        }
+
+        .stat-label {
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="file"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--text-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--highlight-color);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Cross-Video Identity Linking System</h1>
+            <p>Intelligence Platform for Multi-Video Surveillance Analysis</p>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="section">
+            <h2>📊 System Statistics</h2>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-videos">0</div>
+                    <div class="stat-label">Videos Processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-clusters">0</div>
+                    <div class="stat-label">Persons Tracked</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-matches">0</div>
+                    <div class="stat-label">Cross-Video Matches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-jobs">0</div>
+                    <div class="stat-label">Analysis Jobs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="section">
+            <h2>📹 Upload Video</h2>
+            <div id="upload-alert"></div>
+            <form id="upload-form">
+                <div class="upload-area">
+                    <div class="form-group">
+                        <input type="file" id="video-file" name="video" accept=".mp4,.avi,.mov,.mkv" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="frame-skip">Frame Skip (process every Nth frame):</label>
+                        <input type="number" id="frame-skip" name="frame_skip" value="5" min="1" max="30">
+                    </div>
+                    <button type="submit" class="btn">Upload & Process Video</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Videos Section -->
+        <div class="section">
+            <h2>📼 Processed Videos</h2>
+            <button class="btn btn-secondary" onclick="loadVideos()">Refresh Video List</button>
+            <div id="videos-container" class="video-list"></div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div class="section">
+            <h2>🔬 Run Cross-Video Analysis</h2>
+            <p>Compare faces across all videos to identify the same person appearing in multiple videos.</p>
+            <div id="analysis-alert"></div>
+            <button class="btn" onclick="runAnalysis()">Run Full Analysis</button>
+            <div id="analysis-results"></div>
+        </div>
+
+        <!-- Clusters Section -->
+        <div class="section">
+            <h2>👥 Person Clusters</h2>
+            <p>Individuals tracked across multiple videos</p>
+            <button class="btn btn-secondary" onclick="loadClusters()">Load Person Clusters</button>
+            <div id="clusters-container" class="cluster-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load statistics on page load
+        async function loadStats() {
+            try {
+                const [videosRes, clustersRes, jobsRes] = await Promise.all([
+                    fetch('/api/v1/cross-video/videos'),
+                    fetch('/api/v1/cross-video/clusters'),
+                    fetch('/api/v1/cross-video/jobs')
+                ]);
+
+                const videos = await videosRes.json();
+                const clusters = await clustersRes.json();
+                const jobs = await jobsRes.json();
+
+                document.getElementById('stat-videos').textContent = videos.total;
+                document.getElementById('stat-clusters').textContent = clusters.total_clusters;
+                document.getElementById('stat-jobs').textContent = jobs.total_jobs;
+
+                // Get total matches from latest job
+                if (jobs.jobs.length > 0) {
+                    const latestJob = jobs.jobs[0];
+                    document.getElementById('stat-matches').textContent = latestJob.total_matches_found || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Upload video
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const videoFile = document.getElementById('video-file').files[0];
+            const frameSkip = document.getElementById('frame-skip').value;
+
+            formData.append('video', videoFile);
+            formData.append('frame_skip', frameSkip);
+            formData.append('save_frames', 'true');
+
+            const alertDiv = document.getElementById('upload-alert');
+            alertDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Processing video...</p></div>';
+
+            try {
+                const response = await fetch('/api/v1/cross-video/upload-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alertDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✓ ${result.message}<br>
+                            Unique faces found: ${result.unique_faces}<br>
+                            Total detections: ${result.total_detections}
+                        </div>
+                    `;
+                    loadVideos();
+                    loadStats();
+                } else {
+                    alertDiv.innerHTML = `<div class="alert alert-error">Error: ${result.detail}</div>`;
+                }
+            } catch (error) {
+                alertDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Load videos
+        async function loadVideos() {
+            const container = document.getElementById('videos-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const response = await fetch('/api/v1/cross-video/videos');
+                const data = await response.json();
+
+                if (data.videos.length === 0) {
+                    container.innerHTML = '<p>No videos uploaded yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.videos.map(video => `
+                    <div class="video-card">
+                        <h3>${video.filename}</h3>
+                        <span class="status-badge status-${video.status}">${video.status.toUpperCase()}</span>
+                        <p>Unique Faces: <strong>${video.unique_faces_count || 0}</strong></p>
+                        <p>Total Detections: <strong>${video.total_faces_detected || 0}</strong></p>
+                        <p>Duration: ${video.duration_seconds ? video.duration_seconds.toFixed(1) + 's' : 'N/A'}</p>
+                        <button class="btn btn-secondary" onclick="viewVideoDetails(${video.id})">View Details</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<p>Error loading videos: ${error.message}</p>`;
+            }
+        }
+
+        // Run cross-video analysis
+        async function runAnalysis() {
+            const alertDiv = document.getElementById('analysis-alert');
+            const resultsDiv = document.getElementById('analysis-results');
+
+            alertDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Running cross-video analysis...</p></div>';
+            resultsDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/v1/cross-video/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        similarity_threshold: 0.85,
+                        clustering_threshold: 0.90
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alertDiv.innerHTML = `<div class="alert alert-success">✓ Analysis complete!</div>`;
+                    resultsDiv.innerHTML = `
+                        <div class="stats-grid" style="margin-top: 20px;">
+                            <div class="stat-card">
+                                <div class="stat-value">${result.analysis_results.total_comparisons.toLocaleString()}</div>
+                                <div class="stat-label">Total Comparisons</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${result.analysis_results.total_matches_found}</div>
+                                <div class="stat-label">Matches Found</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${result.analysis_results.total_person_clusters}</div>
+                                <div class="stat-label">Person Clusters</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${result.processing_time_seconds.toFixed(1)}s</div>
+                                <div class="stat-label">Processing Time</div>
+                            </div>
+                        </div>
+                    `;
+                    loadStats();
+                } else {
+                    alertDiv.innerHTML = `<div class="alert alert-error">Error: ${result.detail}</div>`;
+                }
+            } catch (error) {
+                alertDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Load person clusters
+        async function loadClusters() {
+            const container = document.getElementById('clusters-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const response = await fetch('/api/v1/cross-video/clusters');
+                const data = await response.json();
+
+                if (data.clusters.length === 0) {
+                    container.innerHTML = '<p>No person clusters found. Run cross-video analysis first.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.clusters.map(cluster => {
+                    // Properly encode the entire image path
+                    let imageSrc = '';
+                    if (cluster.representative_image) {
+                        // Split path into components and encode each part
+                        const pathParts = cluster.representative_image.split('/');
+                        const encodedParts = pathParts.map(part => encodeURIComponent(part));
+                        imageSrc = '/' + encodedParts.join('/');
+                    }
+
+                    return `
+                    <div class="cluster-card">
+                        ${cluster.representative_image ?
+                            `<img src="${imageSrc}" class="cluster-image" alt="${cluster.identifier}" onerror="this.style.display='none'">` :
+                            `<div class="cluster-image"></div>`
+                        }
+                        <h3>${cluster.identified_name || cluster.identifier}</h3>
+                        <p>📹 ${cluster.total_videos} videos</p>
+                        <p>👤 ${cluster.total_appearances} appearances</p>
+                        <button class="btn btn-secondary" onclick="viewClusterDetails(${cluster.id})">View Details</button>
+                    </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                container.innerHTML = `<p>Error loading clusters: ${error.message}</p>`;
+            }
+        }
+
+        function viewVideoDetails(videoId) {
+            window.location.href = `/video/${videoId}`;
+        }
+
+        function viewClusterDetails(clusterId) {
+            alert(`Cluster details view coming soon! Cluster ID: ${clusterId}`);
+        }
+
+        // Load data on page load
+        window.onload = () => {
+            loadStats();
+            loadVideos();
+        };
+    </script>
+</body>
+</html>

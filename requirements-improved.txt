@@ -1,0 +1,52 @@
+# Web Framework
+fastapi==0.115.5
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+aiofiles==24.1.0
+jinja2==3.1.4
+
+# Computer Vision & Face Recognition - IMPROVED FOR WEST AFRICAN FACES
+opencv-python==4.10.0.84
+numpy==1.26.4
+Pillow==11.0.0
+scikit-learn==1.6.0
+
+# InsightFace - Buffalo_L model (512D embeddings, better for diverse faces)
+insightface==0.7.3
+onnxruntime==1.19.2  # Required for InsightFace inference
+onnx==1.16.2
+
+# FAISS - Fast similarity search (optimized for large-scale matching)
+faiss-cpu==1.8.0  # Use faiss-gpu if you have CUDA
+
+# RetinaFace - Better face detection for darker skin tones
+retina-face==0.0.17
+
+# Image quality assessment
+imutils==0.5.4
+scikit-image==0.24.0
+
+# Database
+sqlalchemy==2.0.36
+alembic==1.14.0
+
+# Configuration & Environment
+python-dotenv==1.0.1
+pyyaml==6.0.2
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Utilities
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dateutil==2.9.0.post0
+tqdm==4.66.5  # Progress bars for processing
+
+# Development
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1
+
+# Optional: Keep old libraries for backward compatibility during migration
+# face-recognition==1.3.0  # Comment out after migration
+# deepface==0.0.93  # Comment out after migration

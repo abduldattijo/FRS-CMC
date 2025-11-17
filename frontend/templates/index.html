@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Recognition System - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Facial Recognition System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/" class="active">Dashboard</a></li>
+                    <li><a href="/register">Register Person</a></li>
+                    <li><a href="/monitor">Monitor Detections</a></li>
+                    <li><a href="/unknowns">Unknown Persons</a></li>
+                </ul>
+                </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-persons">0</div>
+                <div class="stat-label">Registered Persons</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value" id="total-detections">0</div>
+                <div class="stat-label">Total Detections</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="unknown-faces">0</div>
+                <div class="stat-label">Unknown Faces</div>
+            </div>
+        </div>
+
+        <!-- Video Upload Section -->
+        <div class="card">
+            <h2 class="card-title">Process CCTV Video</h2>
+            <div id="alert-container"></div>
+
+            <form id="video-upload-form">
+                <div class="form-group">
+                    <label for="video-file">Select Video File</label>
+                    <div class="upload-area" id="upload-area">
+                        <p>Click to select or drag and drop a video file</p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Supported formats: MP4, AVI, MOV, MKV</p>
+                    </div>
+                    <input type="file" id="video-file" accept="video/*" style="display: none;">
+                </div>
+
+                <div class="form-group">
+                    <label for="frame-skip">Process Every Nth Frame (default: 5)</label>
+                    <input type="number" id="frame-skip" min="1" max="30" value="5">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="save-frames" checked>
+                        Save detection frames
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="process-btn">
+                    Process Video
+                </button>
+            </form>
+
+            <div id="processing-status" style="display: none; margin-top: 1.5rem;">
+                <div class="spinner"></div>
+                <p style="text-align: center;">Processing video... This may take a few minutes.</p>
+            </div>
+
+            <div id="results-container" style="display: none; margin-top: 1.5rem;">
+                <h3>Processing Results</h3>
+                <div id="results-stats"></div>
+                <div id="results-detections"></div>
+            </div>
+        </div>
+
+        <!-- Recent Persons -->
+        <div class="card">
+            <h2 class="card-title">Recently Registered Persons</h2>
+            <div id="recent-persons">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Load dashboard data
+        loadDashboardStats();
+        loadRecentPersons();
+
+        // Setup video upload
+        setupVideoUpload();
+    </script>
+</body>
+</html>
