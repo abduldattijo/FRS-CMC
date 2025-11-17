@@ -239,6 +239,76 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: #111827;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            max-width: 1100px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+        }
+
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+
+        .thumb-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .thumb-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .thumb-meta {
+            font-size: 12px;
+            opacity: 0.85;
+            line-height: 1.4;
+        }
+
         .alert {
             padding: 15px;
             border-radius: 5px;
@@ -326,6 +396,22 @@
             <p>Individuals tracked across multiple videos</p>
             <button class="btn btn-secondary" onclick="loadClusters()">Load Person Clusters</button>
             <div id="clusters-container" class="cluster-grid"></div>
+        </div>
+    </div>
+
+    <!-- Cluster Detail Modal -->
+    <div id="cluster-modal" class="modal-overlay" onclick="closeClusterModal(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="cluster-modal-title" style="margin:0; color: var(--highlight-color);"></h3>
+                    <div id="cluster-modal-subtitle" style="opacity:0.8; font-size: 14px;"></div>
+                </div>
+                <button class="btn btn-secondary" onclick="hideClusterModal()">Close</button>
+            </div>
+            <div class="modal-body" id="cluster-modal-body">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
         </div>
     </div>
 
@@ -527,7 +613,81 @@
         }
 
         function viewClusterDetails(clusterId) {
-            alert(`Cluster details view coming soon! Cluster ID: ${clusterId}`);
+            openClusterModal(clusterId);
+        }
+
+        function hideClusterModal() {
+            const overlay = document.getElementById('cluster-modal');
+            overlay.style.display = 'none';
+            document.getElementById('cluster-modal-body').innerHTML = '';
+        }
+
+        function closeClusterModal(event) {
+            if (event.target.id === 'cluster-modal') {
+                hideClusterModal();
+            }
+        }
+
+        async function openClusterModal(clusterId) {
+            const overlay = document.getElementById('cluster-modal');
+            const body = document.getElementById('cluster-modal-body');
+            const title = document.getElementById('cluster-modal-title');
+            const subtitle = document.getElementById('cluster-modal-subtitle');
+
+            overlay.style.display = 'flex';
+            body.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading detections...</p></div>';
+            title.textContent = `Cluster ${clusterId}`;
+            subtitle.textContent = '';
+
+            try {
+                // First fetch cluster summary to get metadata
+                const clusterRes = await fetch(`/api/v1/cross-video/clusters`);
+                const clusterData = await clusterRes.json();
+                const cluster = clusterData.clusters.find(c => c.id === clusterId);
+                if (cluster) {
+                    title.textContent = cluster.identified_name || cluster.identifier;
+                    subtitle.textContent = `📹 ${cluster.total_videos} videos • 👤 ${cluster.total_appearances} appearances`;
+                }
+
+                // Fetch detections for this cluster
+                const detRes = await fetch(`/api/v1/cross-video/clusters/${clusterId}/detections?limit=500`);
+                const detData = await detRes.json();
+
+                if (!detRes.ok) {
+                    body.innerHTML = `<p>Error loading detections: ${detData.detail || detRes.statusText}</p>`;
+                    return;
+                }
+
+                if (!detData.detections || detData.detections.length === 0) {
+                    body.innerHTML = '<p>No saved detection frames for this cluster.</p>';
+                    return;
+                }
+
+                // Render grid of thumbnails
+                const cards = detData.detections.map(det => {
+                    let imgSrc = '';
+                    if (det.detection_image) {
+                        const parts = det.detection_image.split('/');
+                        imgSrc = '/' + parts.map(encodeURIComponent).join('/');
+                    }
+                    const ts = det.timestamp ? new Date(det.timestamp).toLocaleString() : 'N/A';
+                    return `
+                        <div class="thumb-card">
+                            ${imgSrc ? `<img src="${imgSrc}" alt="${det.face_identifier}" onerror="this.style.display='none'">` : '<div style="height:120px;"></div>'}
+                            <div class="thumb-meta">
+                                <div><strong>${det.face_identifier}</strong></div>
+                                <div>Video ID: ${det.video_id}</div>
+                                <div>Frame: ${det.frame_number}</div>
+                                <div>${ts}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                body.innerHTML = `<div class="thumb-grid">${cards}</div>`;
+            } catch (error) {
+                body.innerHTML = `<p>Error loading detections: ${error.message}</p>`;
+            }
         }
 
         // Load data on page load
