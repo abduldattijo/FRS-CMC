@@ -16,6 +16,7 @@ from ...models.cross_video_database import (
     SessionLocal,
     Video,
     VideoFace,
+    RawDetection,
     PersonCluster,
     CrossVideoMatch,
     AnalysisJob
@@ -321,6 +322,55 @@ async def get_cluster_details(
         raise HTTPException(status_code=404, detail="Cluster not found")
 
     return result
+
+
+@router.get("/clusters/{cluster_id}/detections")
+async def list_cluster_detections(
+    cluster_id: int,
+    video_id: Optional[int] = None,
+    limit: int = 200,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+):
+    """
+    List saved detection frames for all faces in a cluster.
+    Useful for reviewing every frame a clustered person appeared in.
+    """
+    cluster = db.query(PersonCluster).filter(PersonCluster.id == cluster_id).first()
+    if not cluster:
+        raise HTTPException(status_code=404, detail="Cluster not found")
+
+    face_query = db.query(VideoFace).filter(VideoFace.cluster_id == cluster_id)
+    if video_id:
+        face_query = face_query.filter(VideoFace.video_id == video_id)
+    faces = face_query.all()
+    face_ids = [f.id for f in faces]
+
+    if not face_ids:
+        return {"total_detections": 0, "detections": []}
+
+    det_query = db.query(RawDetection).filter(RawDetection.video_face_id.in_(face_ids))
+    det_query = det_query.order_by(RawDetection.timestamp.asc()).offset(offset).limit(limit)
+    detections = det_query.all()
+
+    face_lookup = {f.id: f for f in faces}
+
+    return {
+        "cluster_id": cluster_id,
+        "video_id": video_id,
+        "total_detections": len(detections),
+        "detections": [
+            {
+                "video_face_id": det.video_face_id,
+                "face_identifier": face_lookup[det.video_face_id].face_identifier,
+                "video_id": face_lookup[det.video_face_id].video_id,
+                "frame_number": det.frame_number,
+                "timestamp": det.timestamp.isoformat() if det.timestamp else None,
+                "detection_image": det.detection_image_path,
+            }
+            for det in detections
+        ],
+    }
 
 
 @router.post("/clusters/{cluster_id}/identify")
